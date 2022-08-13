@@ -80,7 +80,7 @@ public class GraphControl : MonoBehaviour
         graph.Edges.Add(edge3);
         graph.Edges.Add(edge32);*/
 
-        Debug.Log("Starting");
+        Debug.Log("pNodes: " + graph.pNodes.Count + " aNodes: " + graph.aNodes.Count + " iNodes: " + graph.iNodes.Count + " eNodes: " + graph.eNodes.Count);
         Build();
     }
     
@@ -89,9 +89,10 @@ public class GraphControl : MonoBehaviour
     {
         if (Input.GetKey(KeyCode.T) && x<1)
         {
+            Debug.Log("Next"); 
             Next();
             x++;
-            Debug.Log("Next");
+            
         }
         if (Input.GetKey(KeyCode.R))
         {
@@ -105,18 +106,20 @@ public class GraphControl : MonoBehaviour
         
         if(pCount + 1 == graph.pNodes.Count)
         {
+            Debug.Log("No more pNodes");
             return;
         }
-        else if (graph.pNodes[pCount].Parent == graph.pNodes[pCount + 1].Parent)
+        
+        if (graph.pNodes[pCount].Parent == graph.pNodes[pCount + 1].Parent)
         {
             graph.pNodes[pCount].Position = Pnow;
             graph.pNodes[pCount + 1].Position = Pnext;
         }
         else if(graph.aNodes[aCount].Parent == graph.aNodes[aCount + 1].Parent)
         {
+            aCount++;
             graph.aNodes[aCount].Position = Anow;
             graph.aNodes[aCount + 1].Position = Anext;
-            aCount++;
         }
         /*else if (graph.iNodes[iCount].Parent == graph.iNodes[iCount + 1].Parent)
         {
@@ -168,7 +171,8 @@ public class GraphControl : MonoBehaviour
     private void Build()
     {
         int i = 0;
-        drawCount = 0;
+        //drawCount = 0;
+        ClearNodes();
         while(i<2)
         {
             DrawNode(graph.eNodes[eCount + i]);
@@ -189,45 +193,60 @@ public class GraphControl : MonoBehaviour
         //Debug.Log("Buid Done");
     }
 
+    private void ClearNodes()
+    {
+        GameObject[] nodes = GameObject.FindGameObjectsWithTag("GraphButton");
+        foreach (var node in nodes)
+        {
+            Destroy(node);
+        }
+    }
+
     private void DrawNode(Node node)
     {
-
+        
         GameObject but;
-        if (node.Position.y < -500)
+        if (graph.pNodes.Contains(node))
         {
             but = Instantiate(pButton, panel.transform, false);
-            if (node.Position == Pnow)
+            if (node == graph.pNodes[pCount])
             {
                 but.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = "P" + (pCount + 1);
+                Debug.Log("Drawing p node: " + pCount + " at position: " + node.Position);
             }
             else
             {
                 but.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = "P" + (pCount + 2);
+                Debug.Log("Drawing p node: " + (pCount + 1) + " at position: " + node.Position);
             }
 
         }
         else if(node.Position.y < 0)
         {
             but = Instantiate(aButton, panel.transform, false);
-            if (node.Position == Anow)
+            if (node == graph.aNodes[aCount])
             {
                 but.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = "A" + (aCount + 1);
+                Debug.Log("Drawing a node: " + aCount + " at position: " + node.Position);
             }
-            else if (node.Position == Anext)
+            else
             {
                 but.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = "A" + (aCount + 2);
+                Debug.Log("Drawing a node: " + (aCount + 1) + " at position: " + node.Position);
             }
         }
         else if(node.Position.y < 500)
         {
             but = Instantiate(iButton, panel.transform, false);
-            if (node.Position == Inow)
+            if (node == graph.iNodes[iCount])
             {
                 but.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = "I" + (iCount + 1);
+                Debug.Log("Drawing i node: " + iCount + " at position: " + node.Position);
             }
-            else if (node.Position == Inext)
+            else
             {
                 but.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = "I" + (iCount + 2);
+                Debug.Log("Drawing i node: " + (iCount + 1) + " at position: " + node.Position);
             }
         }
         else

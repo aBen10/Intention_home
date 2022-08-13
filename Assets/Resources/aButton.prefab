@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 6081837963408690292}
   m_Layer: 5
   m_Name: aButton
-  m_TagString: Untagged
+  m_TagString: GraphButton
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
