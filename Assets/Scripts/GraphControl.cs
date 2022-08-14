@@ -1,18 +1,26 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using TMPro;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Video;
+using static System.Net.Mime.MediaTypeNames;
+using Debug = UnityEngine.Debug;
+using Image = UnityEngine.UI.Image;
+using Button = UnityEngine.UI.Button;
+using UnityEditor;
+
 
 public class GraphControl : MonoBehaviour
 {
 
     Graph graph;
     private GameObject iButton, eButton, aButton, pButton;
-    public GameObject panel;
+    public GameObject panel, cup;
+    public GameObject preview, instantiatedPreview;
     public Material lineMaterial;
     private GameObject line, lineDiag;
     private Vector3 Enow, Enext, Inow, Inext, Anow, Anext, Pnow, Pnext;
@@ -24,13 +32,13 @@ public class GraphControl : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-
         iButton = Resources.Load("iButton") as GameObject;
         eButton = Resources.Load("eButton") as GameObject;
         aButton = Resources.Load("aButton") as GameObject;
         pButton = Resources.Load("pButton") as GameObject;
         line = Resources.Load("LineDown") as GameObject;
         lineDiag = Resources.Load("LineDiag") as GameObject;
+        preview = Resources.Load("ScrubScreenBig") as GameObject;
         graph = new Graph();
         Enow = new Vector3(-300, 700, 0);
         Enext = new Vector3(300, 700, 0);
@@ -42,12 +50,13 @@ public class GraphControl : MonoBehaviour
         Pnext = new Vector3(300, -998, 0);
 
         var e1 = new Node() { NodeColor = Color.red, Position = Enow };
-        var e2 = new Node() { NodeColor = Color.red, Position = Enext};
+        var e2 = new Node() { NodeColor = Color.red, Position = Enext };
         var i1 = new Node() { NodeColor = Color.blue, Position = Inow, Parent = e1 };
         var i2 = new Node() { NodeColor = Color.blue, Position = Inext, Parent = e1 };
-        var a1 = new Node() { NodeColor = Color.green, Position = Anow, Parent = i1 };
+        var a1 = new Node() { NodeColor = Color.green, Position = Anow, Parent = i1, };
         var a2 = new Node() { NodeColor = Color.green, Position = Anext, Parent = i1 };
         var a3 = new Node() { Parent = i1 };
+        var a4 = new Node() { Parent = i1 };
         var p1 = new Node() { NodeColor = Color.yellow, Position = Pnow, Parent = a1 };
         var p2 = new Node() { NodeColor = Color.yellow, Position = Pnext, Parent = a1 };
         var p3 = new Node() { Parent = a1 };
@@ -60,18 +69,12 @@ public class GraphControl : MonoBehaviour
         var edge3 = new Edge() { From = a1, To = p1, EdgeColor = Color.green };
         var edge32 = new Edge() { From = a1, To = p2, EdgeColor = Color.green };*/
 
-        graph.eNodes.Add(e1);
-        graph.eNodes.Add(e2);
-        graph.iNodes.Add(i1);
-        graph.iNodes.Add(i2);
-        graph.aNodes.Add(a1);
-        graph.aNodes.Add(a2);
-        graph.aNodes.Add(a3);
-        graph.pNodes.Add(p1);
-        graph.pNodes.Add(p2);
-        graph.pNodes.Add(p3);
-        graph.pNodes.Add(p4);
-        graph.pNodes.Add(p5);
+        p1.Highlights.Add(cup);
+
+        graph.eNodes.Add(e1); graph.eNodes.Add(e2);
+        graph.iNodes.Add(i1); graph.iNodes.Add(i2);
+        graph.aNodes.Add(a1); graph.aNodes.Add(a2); graph.aNodes.Add(a3); graph.aNodes.Add(a4);
+        graph.pNodes.Add(p1); graph.pNodes.Add(p2); graph.pNodes.Add(p3); graph.pNodes.Add(p4); graph.pNodes.Add(p5);
 
         /*graph.Edges.Add(edge1);
         graph.Edges.Add(edge12);
@@ -83,43 +86,66 @@ public class GraphControl : MonoBehaviour
         Debug.Log("pNodes: " + graph.pNodes.Count + " aNodes: " + graph.aNodes.Count + " iNodes: " + graph.iNodes.Count + " eNodes: " + graph.eNodes.Count);
         Build();
     }
-    
+
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKey(KeyCode.T) && x<1)
+        if (Input.GetKey(KeyCode.T) && x < 1)
         {
-            Debug.Log("Next"); 
+            Debug.Log("Next");
+            GameObject.Find("BotLineDiag").GetComponent<Image>().enabled = true;
+            //GameObject.Find("BotLineDiag").SetActive(true);
             Next();
             x++;
-            
+
         }
         if (Input.GetKey(KeyCode.R))
         {
             x = 0;
         }
+        if (Input.GetKeyDown(KeyCode.L))
+        {
+            if (cup.GetComponentInChildren<Outline>().isActiveAndEnabled == true)
+            {
+                cup.GetComponentInChildren<Outline>().enabled = false;
+            }
+            else
+            {
+                cup.GetComponentInChildren<Outline>().enabled = true;
+            }
+            //cup.GetComponentInChildren<Outline>().enabled = !cup.GetComponentInChildren<Outline>().enabled;
+        }
     }
 
     private void Next()
     {
-        pCount++;
-        
-        if(pCount + 1 == graph.pNodes.Count)
+        if (pCount + 1 == graph.pNodes.Count)
         {
             Debug.Log("No more pNodes");
             return;
         }
-        
+
         if (graph.pNodes[pCount].Parent == graph.pNodes[pCount + 1].Parent)
         {
+            //tracks index in pNodes of the current node (the bottom left button)
+            pCount++;
             graph.pNodes[pCount].Position = Pnow;
             graph.pNodes[pCount + 1].Position = Pnext;
+            if (graph.pNodes[pCount + 1] != null && graph.pNodes[pCount].Parent != graph.pNodes[pCount + 1].Parent)
+            {
+                GameObject.Find("BotLineDiag").GetComponent<Image>().enabled = false;
+                //GameObject.Find("BotLineDiag").SetActive(false);
+            }
+            //else GameObject.Find("BotLineDiag").SetActive(true);
         }
-        else if(graph.aNodes[aCount].Parent == graph.aNodes[aCount + 1].Parent)
+        else if (graph.aNodes[aCount].Parent == graph.aNodes[aCount + 1].Parent)
         {
             aCount++;
+            pCount++;
             graph.aNodes[aCount].Position = Anow;
             graph.aNodes[aCount + 1].Position = Anext;
+            graph.pNodes[pCount].Position = Pnow;
+            graph.pNodes[pCount + 1].Position = Pnext;
         }
         /*else if (graph.iNodes[iCount].Parent == graph.iNodes[iCount + 1].Parent)
         {
@@ -131,36 +157,36 @@ public class GraphControl : MonoBehaviour
             graph.eNodes[eCount].Position = Enow;
             graph.eNodes[eCount + 1].Position = Enext;
         }*/
-   /*     else
-        {
-            graph.pNodes[pCount].Position = Pnow;
-            graph.pNodes[pCount + 1].Position = Pnext;
-            aCount++;
-            if (aCount + 1 == graph.aNodes.Count)
-            {
-                return;
-            }
-            else if (graph.aNodes[aCount].Parent == graph.aNodes[aCount + 1].Parent)
-            {
-                graph.aNodes[aCount].Position = Anow;
-                graph.aNodes[aCount + 1].Position = Anext;
-            }
-            else if (graph.iNodes[iCount].Parent == graph.iNodes[iCount + 1].Parent)
-            {
-                graph.iNodes[iCount].Position = Inow;
-                graph.iNodes[iCount + 1].Position = Inext;
-            }
-            else if (graph.eNodes[eCount].Parent == graph.eNodes[eCount + 1].Parent)
-            {
-                graph.eNodes[eCount].Position = Enow;
-                graph.eNodes[eCount + 1].Position = Enext;
-            }
-            else
-            {
-                graph.aNodes[aCount].Position = Anow;
-                graph.aNodes[aCount + 1].Position = Anext;
-                iCount++;
-            }*/
+        /*     else
+             {
+                 graph.pNodes[pCount].Position = Pnow;
+                 graph.pNodes[pCount + 1].Position = Pnext;
+                 aCount++;
+                 if (aCount + 1 == graph.aNodes.Count)
+                 {
+                     return;
+                 }
+                 else if (graph.aNodes[aCount].Parent == graph.aNodes[aCount + 1].Parent)
+                 {
+                     graph.aNodes[aCount].Position = Anow;
+                     graph.aNodes[aCount + 1].Position = Anext;
+                 }
+                 else if (graph.iNodes[iCount].Parent == graph.iNodes[iCount + 1].Parent)
+                 {
+                     graph.iNodes[iCount].Position = Inow;
+                     graph.iNodes[iCount + 1].Position = Inext;
+                 }
+                 else if (graph.eNodes[eCount].Parent == graph.eNodes[eCount + 1].Parent)
+                 {
+                     graph.eNodes[eCount].Position = Enow;
+                     graph.eNodes[eCount + 1].Position = Enext;
+                 }
+                 else
+                 {
+                     graph.aNodes[aCount].Position = Anow;
+                     graph.aNodes[aCount + 1].Position = Anext;
+                     iCount++;
+                 }*/
         else
         {
             Debug.Log("End of graph");
@@ -173,7 +199,7 @@ public class GraphControl : MonoBehaviour
         int i = 0;
         //drawCount = 0;
         ClearNodes();
-        while(i<2)
+        while (i < 2)
         {
             DrawNode(graph.eNodes[eCount + i]);
             DrawNode(graph.iNodes[iCount + i]);
@@ -181,6 +207,7 @@ public class GraphControl : MonoBehaviour
             DrawNode(graph.pNodes[pCount + i]);
             i++;
         }
+
         /*foreach (var node in graph.eNodes) { DrawNode(node); }
         foreach (var node in graph.iNodes) { DrawNode(node); }
         foreach (var node in graph.aNodes) { DrawNode(node); }
@@ -204,7 +231,7 @@ public class GraphControl : MonoBehaviour
 
     private void DrawNode(Node node)
     {
-        
+
         GameObject but;
         if (graph.pNodes.Contains(node))
         {
@@ -212,6 +239,7 @@ public class GraphControl : MonoBehaviour
             if (node == graph.pNodes[pCount])
             {
                 but.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = "P" + (pCount + 1);
+                but.gameObject.GetComponent<Button>().onClick.AddListener(() => HighlightObj(node));
                 Debug.Log("Drawing p node: " + pCount + " at position: " + node.Position);
             }
             else
@@ -221,12 +249,13 @@ public class GraphControl : MonoBehaviour
             }
 
         }
-        else if(node.Position.y < 0)
+        else if (node.Position.y < 0)
         {
             but = Instantiate(aButton, panel.transform, false);
             if (node == graph.aNodes[aCount])
             {
                 but.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = "A" + (aCount + 1);
+                but.gameObject.GetComponent<Button>().onClick.AddListener(() => InstantiateVid(node));
                 Debug.Log("Drawing a node: " + aCount + " at position: " + node.Position);
             }
             else
@@ -235,7 +264,7 @@ public class GraphControl : MonoBehaviour
                 Debug.Log("Drawing a node: " + (aCount + 1) + " at position: " + node.Position);
             }
         }
-        else if(node.Position.y < 500)
+        else if (node.Position.y < 500)
         {
             but = Instantiate(iButton, panel.transform, false);
             if (node == graph.iNodes[iCount])
@@ -253,14 +282,51 @@ public class GraphControl : MonoBehaviour
         {
             but = Instantiate(eButton, panel.transform, false);
             //but.GetComponentInChildren<TextMeshPro>().text = "test";
-            
+
         }
         but.GetComponent<Transform>().localPosition = panel.transform.position + node.Position;
         but.GetComponent<MeshRenderer>().material.SetColor("_Color", node.NodeColor);
         drawCount++;
         //Debug.Log("Drawing");
     }
-    
+
+    private void HighlightObj(Node node)
+    {
+        Debug.Log("Highlighting");
+        foreach (GameObject n in node.Highlights)
+        {
+            Debug.Log("Highlighting: " + n.name);
+            if (n.GetComponentInChildren<Outline>().isActiveAndEnabled == true)
+            {
+                n.GetComponentInChildren<Outline>().enabled = false;
+            }
+            else
+            {
+                n.GetComponentInChildren<Outline>().enabled = true;
+            }
+        }
+
+        
+    }
+
+    public void InstantiateVid(Node node)
+    {
+        if (GameObject.Find("ScrubScreenBig(Clone)"))
+        {
+            Destroy(GameObject.Find("ScrubScreenBig(Clone)"));
+            return;
+        }
+        Debug.Log("Instantiate Video");
+        Vector3 instantiatePoint = node.Position;
+        instantiatePoint.y = instantiatePoint.y + 400;
+        //GameObject go = Instantiate(preview, instantiatePoint, Quaternion.identity, GameObject.Find("Progress").transform);
+        GameObject go = Instantiate(preview, GameObject.Find("aButton(Clone)").transform, false);
+
+        Debug.Log("Initial POS: " + go.GetComponent<Transform>().position);
+        instantiatedPreview = go;
+        instantiatedPreview.GetComponent<Transform>().localPosition = instantiatePoint;
+    }
+
     /*void DrawLine(Node start, Node end, Color color)
     {
         count++;
@@ -294,15 +360,15 @@ public class GraphControl : MonoBehaviour
             iNodes = new List<Node>();
             aNodes = new List<Node>();
             pNodes = new List<Node>();
-            Edges = new List<Edge>();
+            //Edges = new List<Edge>();
         }
 
         public List<Node> eNodes { get; set; }
         public List<Node> iNodes { get; set; }
         public List<Node> aNodes { get; set; }
-        public List<Node > pNodes { get; set; }
+        public List<Node> pNodes { get; set; }
 
-        public List<Edge> Edges { get; set; }
+        //public List<Edge> Edges { get; set; }
     }
 
     public class Node
@@ -317,37 +383,40 @@ public class GraphControl : MonoBehaviour
             //temp.GetComponent<Renderer>().material.color = color;
             NodeColor = color;
             Position = position;
-        }
+        }*/
         public Node()
         {
             NodeColor = Color.white;
             Position = Vector3.zero;
-        }*/
+            Highlights = new List<GameObject>();
+        }
         public Color NodeColor { get; set; }
         public Vector3 Position { get; set; }
         public Node Parent { get; set; }
+        public String File { get; set; }
+        public List<GameObject> Highlights { get; set; }
     }
-/*    public class iNode
-    {
+    /*    public class iNode
+        {
 
-        public Color NodeColor { get; set; }
-        public Vector3 Position { get; set; }
-        public eNode Parent { get; set; }
-    }
-    public class aNode
-    {
+            public Color NodeColor { get; set; }
+            public Vector3 Position { get; set; }
+            public eNode Parent { get; set; }
+        }
+        public class aNode
+        {
 
-        public Color NodeColor { get; set; }
-        public Vector3 Position { get; set; }
-        public iNode Parent { get; set; }
-    }
-    public class pNode
-    {
+            public Color NodeColor { get; set; }
+            public Vector3 Position { get; set; }
+            public iNode Parent { get; set; }
+        }
+        public class pNode
+        {
 
-        public Color NodeColor { get; set; }
-        public Vector3 Position { get; set; }
-        public aNode Parent { get; set; }
-    }*/
+            public Color NodeColor { get; set; }
+            public Vector3 Position { get; set; }
+            public aNode Parent { get; set; }
+        }*/
 
     public class Edge //make generic?
     {
