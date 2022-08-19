@@ -1,4 +1,4 @@
-using System;
+/*using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -23,7 +23,7 @@ public class GraphControl : MonoBehaviour
     public GameObject preview, instantiatedPreview;
     public Material lineMaterial;
     private GameObject line, lineDiag;
-    private Vector3 Enow, Enext, Inow, Inext, Anow, Anext, Pnow, Pnext;
+    private Vector3 Elast, Enow, Enext, Ilast, Inow, Inext, Alast, Anow, Anext, Pnow, Pnext;
     int count = 0;
     int x = 0;
     int drawCount = 0;
@@ -40,10 +40,13 @@ public class GraphControl : MonoBehaviour
         lineDiag = Resources.Load("LineDiag") as GameObject;
         preview = Resources.Load("ScrubScreenBig") as GameObject;
         graph = new Graph();
+        Elast = new Vector3(-900, 700, 0);
         Enow = new Vector3(-300, 700, 0);
         Enext = new Vector3(300, 700, 0);
+        Ilast = new Vector3(-900, 134, 0);
         Inow = new Vector3(-300, 134, 0);
         Inext = new Vector3(300, 134, 0);
+        Alast = new Vector3(-900, -432, 0);
         Anow = new Vector3(-300, -432, 0);
         Anext = new Vector3(300, -432, 0);
         Pnow = new Vector3(-300, -998, 0);
@@ -62,12 +65,6 @@ public class GraphControl : MonoBehaviour
         var p3 = new Node() { Parent = a1 };
         var p4 = new Node() { Parent = a2 };
         var p5 = new Node() { Parent = a2 };
-        /*var edge1 = new Edge() { From = e1, To = i1, EdgeColor = Color.green };
-        var edge12 = new Edge() { From = e1, To = i2, EdgeColor = Color.green };
-        var edge2 = new Edge() { From = i1, To = a1, EdgeColor = Color.green };
-        var edge22 = new Edge() { From = i1, To = a2, EdgeColor = Color.green };
-        var edge3 = new Edge() { From = a1, To = p1, EdgeColor = Color.green };
-        var edge32 = new Edge() { From = a1, To = p2, EdgeColor = Color.green };*/
 
         p1.Highlights.Add(cup);
 
@@ -75,13 +72,6 @@ public class GraphControl : MonoBehaviour
         graph.iNodes.Add(i1); graph.iNodes.Add(i2);
         graph.aNodes.Add(a1); graph.aNodes.Add(a2); graph.aNodes.Add(a3); graph.aNodes.Add(a4);
         graph.pNodes.Add(p1); graph.pNodes.Add(p2); graph.pNodes.Add(p3); graph.pNodes.Add(p4); graph.pNodes.Add(p5);
-
-        /*graph.Edges.Add(edge1);
-        graph.Edges.Add(edge12);
-        graph.Edges.Add(edge2);
-        graph.Edges.Add(edge22);
-        graph.Edges.Add(edge3);
-        graph.Edges.Add(edge32);*/
 
         Debug.Log("pNodes: " + graph.pNodes.Count + " aNodes: " + graph.aNodes.Count + " iNodes: " + graph.iNodes.Count + " eNodes: " + graph.eNodes.Count);
         Build();
@@ -147,46 +137,7 @@ public class GraphControl : MonoBehaviour
             graph.pNodes[pCount].Position = Pnow;
             graph.pNodes[pCount + 1].Position = Pnext;
         }
-        /*else if (graph.iNodes[iCount].Parent == graph.iNodes[iCount + 1].Parent)
-        {
-            graph.iNodes[iCount].Position = Inow;
-            graph.iNodes[iCount + 1].Position = Inext;
-        }
-        else if (graph.eNodes[eCount].Parent == graph.eNodes[eCount + 1].Parent)
-        {
-            graph.eNodes[eCount].Position = Enow;
-            graph.eNodes[eCount + 1].Position = Enext;
-        }*/
-        /*     else
-             {
-                 graph.pNodes[pCount].Position = Pnow;
-                 graph.pNodes[pCount + 1].Position = Pnext;
-                 aCount++;
-                 if (aCount + 1 == graph.aNodes.Count)
-                 {
-                     return;
-                 }
-                 else if (graph.aNodes[aCount].Parent == graph.aNodes[aCount + 1].Parent)
-                 {
-                     graph.aNodes[aCount].Position = Anow;
-                     graph.aNodes[aCount + 1].Position = Anext;
-                 }
-                 else if (graph.iNodes[iCount].Parent == graph.iNodes[iCount + 1].Parent)
-                 {
-                     graph.iNodes[iCount].Position = Inow;
-                     graph.iNodes[iCount + 1].Position = Inext;
-                 }
-                 else if (graph.eNodes[eCount].Parent == graph.eNodes[eCount + 1].Parent)
-                 {
-                     graph.eNodes[eCount].Position = Enow;
-                     graph.eNodes[eCount + 1].Position = Enext;
-                 }
-                 else
-                 {
-                     graph.aNodes[aCount].Position = Anow;
-                     graph.aNodes[aCount + 1].Position = Anext;
-                     iCount++;
-                 }*/
+
         else
         {
             Debug.Log("End of graph");
@@ -207,17 +158,6 @@ public class GraphControl : MonoBehaviour
             DrawNode(graph.pNodes[pCount + i]);
             i++;
         }
-
-        /*foreach (var node in graph.eNodes) { DrawNode(node); }
-        foreach (var node in graph.iNodes) { DrawNode(node); }
-        foreach (var node in graph.aNodes) { DrawNode(node); }
-        foreach (var node in graph.pNodes) { DrawNode(node); }*/
-
-        /*foreach (var edge in graph.Edges)
-        {
-            DrawLine(edge.From, edge.To, edge.EdgeColor);
-        }*/
-        //Debug.Log("Buid Done");
     }
 
     private void ClearNodes()
@@ -306,10 +246,10 @@ public class GraphControl : MonoBehaviour
             }
         }
 
-        
+
     }
 
-    public void InstantiateVid(Node node)
+    private void InstantiateVid(Node node)
     {
         if (GameObject.Find("ScrubScreenBig(Clone)"))
         {
@@ -326,31 +266,6 @@ public class GraphControl : MonoBehaviour
         instantiatedPreview = go;
         instantiatedPreview.GetComponent<Transform>().localPosition = instantiatePoint;
     }
-
-    /*void DrawLine(Node start, Node end, Color color)
-    {
-        count++;
-        GameObject temp;
-        Vector3 loc;
-        if (end.Position.x < 0)
-        {
-            temp = Instantiate(line, panel.transform, false) as GameObject;
-            loc = temp.GetComponent<Transform>().localPosition;
-            loc.x = end.Position.x;
-        }
-        else
-        {
-            temp = Instantiate(lineDiag, panel.transform, false) as GameObject;
-            loc = temp.GetComponent<Transform>().localPosition;
-            loc.x = 40;
-        }
-
-        loc.y = Math.Abs((end.Position.y - start.Position.y) / 2) + end.Position.y;
-        Debug.Log(count);
-        Debug.Log((end.Position.y - start.Position.y) / 2);
-        Debug.Log(((Math.Abs(end.Position.y) + Math.Abs(start.Position.y)) / 2) + end.Position.y);
-        temp.GetComponent<Transform>().localPosition = loc;
-    }*/
 
     public class Graph
     {
@@ -375,15 +290,6 @@ public class GraphControl : MonoBehaviour
     {
         //private GameObject nodeButton;
 
-        /*public Node(Color color, Vector3 position)
-        {
-            //GameObject temp = Instantiate(buttons, GameObject.Find("RightPanel").transform, false);
-            //temp.GetComponent<RectTransform>().anchoredPosition = position;
-            //temp.GetComponent<RectTransform>().localPosition = position;
-            //temp.GetComponent<Renderer>().material.color = color;
-            NodeColor = color;
-            Position = position;
-        }*/
         public Node()
         {
             NodeColor = Color.white;
@@ -396,39 +302,7 @@ public class GraphControl : MonoBehaviour
         public String File { get; set; }
         public List<GameObject> Highlights { get; set; }
     }
-    /*    public class iNode
-        {
-
-            public Color NodeColor { get; set; }
-            public Vector3 Position { get; set; }
-            public eNode Parent { get; set; }
-        }
-        public class aNode
-        {
-
-            public Color NodeColor { get; set; }
-            public Vector3 Position { get; set; }
-            public iNode Parent { get; set; }
-        }
-        public class pNode
-        {
-
-            public Color NodeColor { get; set; }
-            public Vector3 Position { get; set; }
-            public aNode Parent { get; set; }
-        }*/
-
-    public class Edge //make generic?
-    {
-        public Node From { get; set; }
-        public Node To { get; set; }
-        public Color EdgeColor { get; set; }
-
-    }
-
-
-
-
 
 }
 
+*/
