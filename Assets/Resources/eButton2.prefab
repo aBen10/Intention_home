@@ -149,7 +149,7 @@ GameObject:
   - component: {fileID: 1574036558773269536}
   - component: {fileID: -4821325500520409933}
   m_Layer: 5
-  m_Name: eButton
+  m_Name: eButton2
   m_TagString: GraphButton
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -164,7 +164,7 @@ RectTransform:
   m_GameObject: {fileID: 1574036558773269566}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 2.5, y: 9, z: 1.832}
+  m_LocalScale: {x: 2.5, y: 7.5, z: 1.832}
   m_Children:
   - {fileID: 1574036558754454680}
   m_Father: {fileID: 0}
@@ -196,7 +196,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 0, b: 0.032221794, a: 1}
+  m_Color: {r: 1, g: 0, b: 0.032221794, a: 0.5372549}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1

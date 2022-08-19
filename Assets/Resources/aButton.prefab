@@ -31,7 +31,7 @@ RectTransform:
   m_GameObject: {fileID: 1574181103537946618}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 19.53}
-  m_LocalScale: {x: 2.9851735, y: 2.9851735, z: 3.3168595}
+  m_LocalScale: {x: 2, y: 4, z: 3.3168595}
   m_Children:
   - {fileID: 6407263466260614441}
   m_Father: {fileID: 0}
@@ -63,7 +63,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 1, b: 0.7550447, a: 1}
+  m_Color: {r: 0, g: 0.26308107, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -229,7 +229,7 @@ RectTransform:
   m_GameObject: {fileID: 4962029667031403007}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.5, y: 0.74, z: 1}
   m_Children: []
   m_Father: {fileID: 6379354125127778528}
   m_RootOrder: 0
@@ -330,7 +330,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_margin: {x: 24.120728, y: 0, z: 24.391113, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
