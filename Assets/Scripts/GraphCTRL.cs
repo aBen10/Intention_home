@@ -122,8 +122,10 @@ public class GraphCTRL : MonoBehaviour
         {
             iCount++;
             aCount++;
+            graph.iNodes[iCount - 1].Position = Ilast;
             graph.iNodes[iCount].Position = Inow;
             graph.iNodes[iCount + 1].Position = Inext;
+            graph.aNodes[aCount - 1].Position = Alast;
             graph.aNodes[aCount].Position = Anow;
             graph.aNodes[aCount + 1].Position = Anext;
         }
