@@ -12,7 +12,7 @@ using Debug = UnityEngine.Debug;
 using Image = UnityEngine.UI.Image;
 using Button = UnityEngine.UI.Button;
 using UnityEditor;
-
+using System.Linq;
 
 public class GraphCTRL : MonoBehaviour
 {
@@ -24,6 +24,7 @@ public class GraphCTRL : MonoBehaviour
     public Material lineMaterial;
     private GameObject line, lineDiag;
     private Vector3 Elast, Enow, Enext, Ilast, Inow, Inext, Alast, Anow, Anext;
+    public List<VideoClip> Clips = new List<VideoClip>();
     int count = 0;
     int x = 0;
     int drawCount = 0;
@@ -32,6 +33,11 @@ public class GraphCTRL : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        //Clips.AddRange(Resources.LoadAll<GameObject>("Clips"));
+        Clips.AddRange(Resources.LoadAll<VideoClip>("Clips"));
+        Debug.Log(Clips.Count);
+        Debug.Log(Clips[0].name);
+        Debug.Log(Clips[0]);
         iButton = Resources.Load("iButton") as GameObject;
         iButton2 = Resources.Load("iButton2") as GameObject;
         eButton = Resources.Load("eButton") as GameObject;
@@ -318,12 +324,14 @@ public class GraphCTRL : MonoBehaviour
             {
                 but = Instantiate(aButton2, rightButtons.transform, false);
                 but.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = "A" + (aCount + 1);
+                but.gameObject.GetComponent<Button>().onClick.AddListener(() => InstantiateVid(node));
                 Debug.Log("Drawing a node: " + (aCount + 1) + " at position: " + node.Position);
             }
             else
             {
                 but = Instantiate(aButton2, leftButtons.transform, false);
                 but.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = "A" + (aCount - 1);
+                but.gameObject.GetComponent<Button>().onClick.AddListener(() => InstantiateVid(node));
                 Debug.Log("Drawing a node: " + (aCount - 1) + " at position: " + node.Position);
             }
         }
@@ -368,15 +376,20 @@ public class GraphCTRL : MonoBehaviour
             return;
         }
         Debug.Log("Instantiate Video");
-        Vector3 instantiatePoint = node.Position;
-        instantiatePoint.y = instantiatePoint.y + 400;
-        instantiatePoint.x = instantiatePoint.x - 600;
+        Vector3 instantiatePoint = panel.transform.position;
+        instantiatePoint.y = instantiatePoint.y - 400;
+        instantiatePoint.x = instantiatePoint.x - 1000;
         //GameObject go = Instantiate(preview, instantiatePoint, Quaternion.identity, GameObject.Find("Progress").transform);
-        GameObject go = Instantiate(preview, GameObject.Find("aButton(Clone)").transform, false);
+        //GameObject go = Instantiate(preview, GameObject.Find("aButton(Clone)").transform, false);
+        GameObject go = Instantiate(preview, panel.transform, false);
 
         Debug.Log("Initial POS: " + go.GetComponent<Transform>().position);
         instantiatedPreview = go;
-        instantiatedPreview.GetComponent<Transform>().localPosition = instantiatePoint;
+        if (graph.aNodes.Contains(node))
+        {
+            instantiatedPreview.GetComponent<Transform>().localPosition = instantiatePoint;
+            instantiatedPreview.GetComponent<VideoPlayer>().clip = Clips[graph.aNodes.IndexOf(node)];
+        }
     }
 
     public class Graph
