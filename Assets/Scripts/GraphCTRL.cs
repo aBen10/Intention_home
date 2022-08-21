@@ -14,6 +14,7 @@ using Button = UnityEngine.UI.Button;
 using UnityEditor;
 using System.Linq;
 
+//Controls graph animation
 public class GraphCTRL : MonoBehaviour
 {
 
@@ -33,11 +34,12 @@ public class GraphCTRL : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        //Clips.AddRange(Resources.LoadAll<GameObject>("Clips"));
+        //Loads clips from Resources folder into list
         Clips.AddRange(Resources.LoadAll<VideoClip>("Clips"));
         Debug.Log(Clips.Count);
         Debug.Log(Clips[0].name);
         Debug.Log(Clips[0]);
+        //load button and lineprefabs from Resources folder
         iButton = Resources.Load("iButton") as GameObject;
         iButton2 = Resources.Load("iButton2") as GameObject;
         eButton = Resources.Load("eButton") as GameObject;
@@ -46,35 +48,22 @@ public class GraphCTRL : MonoBehaviour
         line = Resources.Load("LineDown") as GameObject;
         lineDiag = Resources.Load("LineDiag") as GameObject;
         preview = Resources.Load("ScrubScreenBig") as GameObject;
+        //Make graph, declare set vectors for buttons, add nodes to graph (these will later be defined by the user study task)
         graph = new Graph();
-        // Elast = new Vector3(-900, 700, 0);
         Enow = new Vector3(0, 700, 0);
-        //Enext = new Vector3(300, 700, 0);
-        Ilast = new Vector3(-400, 134, 0);
-        Inow = new Vector3(0, 134, 0);
-        Inext = new Vector3(400, 134, 0);
-        Alast = new Vector3(-400, -432, 0);
-        Anow = new Vector3(0, -432, 0);
-        Anext = new Vector3(400, -432, 0);
+        Ilast = new Vector3(-400, 134, 0); Inow = new Vector3(0, 134, 0); Inext = new Vector3(400, 134, 0);
+        Alast = new Vector3(-400, -432, 0); Anow = new Vector3(0, -432, 0); Anext = new Vector3(400, -432, 0);
         //Pnow = new Vector3(-300, -998, 0);
         //Pnext = new Vector3(300, -998, 0);
 
-        var e0 = new Node() { NodeColor = Color.red, Position = Enow };
-        var e1 = new Node() { };
+        var e0 = new Node() { NodeColor = Color.red, Position = Enow }; var e1 = new Node() { };
         var i0 = new Node() { NodeColor = Color.blue, Position = Inow, Parent = e0 };
         var i1 = new Node() { NodeColor = Color.blue, Position = Inext, Parent = e0 };
-        var i2 = new Node() { Parent = e0 };
-        var i3 = new Node() { Parent = e1 };
-        var i4 = new Node() { Parent = e1 };
+        var i2 = new Node() { Parent = e0 }; var i3 = new Node() { Parent = e1 }; var i4 = new Node() { Parent = e1 };
         var a0 = new Node() { NodeColor = Color.green, Position = Anow, Parent = i0, };
         var a1 = new Node() { NodeColor = Color.green, Position = Anext, Parent = i0 };
-        var a2 = new Node() { Parent = i0 };
-        var a3 = new Node() { Parent = i0 };
-        var a4 = new Node() { Parent = i1 };
-        var a5 = new Node() { Parent = i1 };
-        var a6 = new Node() { Parent = i2 };
-        var a7 = new Node() { Parent = i3 };
-        var a8 = new Node() { Parent = i4 };
+        var a2 = new Node() { Parent = i0 }; var a3 = new Node() { Parent = i0 }; var a4 = new Node() { Parent = i1 };  var a5 = new Node() { Parent = i1 };   
+        var a6 = new Node() { Parent = i2 }; var a7 = new Node() { Parent = i3 }; var a8 = new Node() { Parent = i4 };
 
         graph.eNodes.Add(e0); graph.eNodes.Add(e1);
         graph.iNodes.Add(i0); graph.iNodes.Add(i1); graph.iNodes.Add(i2); graph.iNodes.Add(i3); graph.iNodes.Add(i4);
@@ -107,7 +96,12 @@ public class GraphCTRL : MonoBehaviour
             x = 0;
         }
     }
-
+    
+    /*transitions to next action. aCount, iCount, and eCount keep track of current action and thier parents. This code uses checks on parents
+     * to figure out how whether it's just the next action, or the user is moving to the next interaction or even the next event. The body
+     * of the "if statements" determins what the graph should look like based on the case. Currently breaks at the end of the graph. Waiting 
+     * to see how user study takes shape before making more changes
+    */
     private void Next()
     {
         if (aCount + 1 == graph.aNodes.Count)
@@ -118,7 +112,6 @@ public class GraphCTRL : MonoBehaviour
 
         if (graph.aNodes[aCount].Parent == graph.aNodes[aCount + 1].Parent)
         {
-            //tracks index in aNodes of the current node (the bottom left button)
             aCount++;
             graph.aNodes[aCount - 1].Position = Alast;
             graph.aNodes[aCount].Position = Anow;
@@ -138,27 +131,16 @@ public class GraphCTRL : MonoBehaviour
         //else if current interaction and next interaction have the same parent event #2
         else if (graph.iNodes[iCount].Parent == graph.iNodes[iCount + 1].Parent)
         {
-            Debug.Log("Check 3");
             iCount++;
             aCount++;
             graph.iNodes[iCount - 1].Position = Ilast;
             graph.iNodes[iCount].Position = Inow;
-            Debug.Log(iCount);
-            Debug.Log(graph.iNodes.Count);
-            if (graph.iNodes.Count > iCount + 1)
-            {
-                graph.iNodes[iCount + 1].Position = Inext;
-            }
+            if (graph.iNodes.Count > iCount + 1) { graph.iNodes[iCount + 1].Position = Inext;}
             
-
             graph.aNodes[aCount - 1].Position = Alast;
             graph.aNodes[aCount].Position = Anow;
-            if (graph.aNodes.Count > aCount + 1)
-            {
-                graph.aNodes[aCount + 1].Position = Anext;
-            }
+            if (graph.aNodes.Count > aCount + 1){ graph.aNodes[aCount + 1].Position = Anext;}
             
-
             Debug.Log("I SWITCH");
             GameObject.Find("LineDiag2").GetComponent<Image>().enabled = false;
             GameObject.Find("LineDownPrev").GetComponent<Image>().enabled = true;
@@ -168,16 +150,13 @@ public class GraphCTRL : MonoBehaviour
             //if there will be a new next action and if the new next action will have a different parent interaction than the new current action
             if (graph.aNodes.Count > aCount + 1 && graph.aNodes[aCount].Parent != graph.aNodes[aCount + 1].Parent)
             {
-                Debug.Log("Check 5");
                 GameObject.Find("LineDiag").GetComponent<Image>().enabled = false;
                 GameObject.Find("LineDownNext").GetComponent<Image>().enabled = true;
                 GameObject.Find("aArrow").GetComponent<Image>().enabled = false;
             }
-            Debug.Log("Check 1");
             //if there will be a new next interaction and if the new current interaction has a different parent event than that new next interaction 
             if(graph.iNodes.Count > iCount + 1 && graph.iNodes.Count > iCount + 1 && graph.iNodes[iCount].Parent != graph.iNodes[iCount + 1].Parent)
             {
-                Debug.Log("Check 6");
 
                 Debug.Log("E SWITCH UP NEXT");
                 GameObject.Find("LineDiag2").GetComponent<Image>().enabled = false;
@@ -188,13 +167,10 @@ public class GraphCTRL : MonoBehaviour
                 GameObject.Find("iArrow").GetComponent<Image>().enabled = false;
                 GameObject.Find("eArrow").GetComponent<Image>().color = Color.yellow;
                 GameObject.Find("LineDiag2Top").GetComponent<Image>().enabled = true;
-                Debug.Log("Building");
                 Build();
-                Debug.Log("Done");
                 //Destroy(GameObject.Find("iButton2(Clone)"));
                 //Destroy(GameObject.Find("aButton2(Clone)").gameObject);
                 rightButtons.SetActive(false);
-                Debug.Log("Deleting");
                 return;
             }
         }
@@ -230,29 +206,9 @@ public class GraphCTRL : MonoBehaviour
             }
 
             Build();
-            Debug.Log("Done2");
             leftButtons.SetActive(false);
-            Debug.Log("Deleting2");
             return;
         }
- /*       else if (graph.iNodes[iCount].Parent == graph.iNodes[iCount + 1].Parent)
-        {
-            iCount++;
-            pCount++;
-            graph.iNodes[iCount].Position = Inow;
-            graph.iNodes[iCount + 1].Position = Inext;
-            graph.pNodes[pCount].Position = Pnow;
-            graph.pNodes[pCount + 1].Position = Pnext;
-        }
-        else if (graph.eNodes[eCount].Parent == graph.eNodes[eCount + 1].Parent)
-        {
-            eCount++;
-            pCount++;
-            graph.eNodes[eCount].Position = Enow;
-            graph.eNodes[eCount + 1].Position = Enext;
-            graph.pNodes[pCount].Position = Pnow;
-            graph.pNodes[pCount + 1].Position = Pnext;
-        }*/
         else
         {
             Debug.Log("End of graph");
@@ -262,26 +218,20 @@ public class GraphCTRL : MonoBehaviour
         Build();
     }
 
+    //Clears graph button game objects then draws the new current node and past/future nodes if applicable
     private void Build()
     {
-        int i = 0;
-        //drawCount = 0;
         ClearNodes();
-/*        while (i < 2)
-        { 
-            DrawNode(graph.iNodes[iCount + i]);
-            DrawNode(graph.aNodes[aCount + i]);
-            i++;
-        }*/
         DrawNode(graph.eNodes[eCount]);
         DrawNode(graph.iNodes[iCount]);
         DrawNode(graph.aNodes[aCount]);
         if (graph.iNodes.Count > iCount + 1) {DrawNode(graph.iNodes[iCount + 1]);}
         if (graph.aNodes.Count > aCount + 1) { DrawNode(graph.aNodes[aCount + 1]); }
-        if (aCount>0) { DrawNode(graph.aNodes[aCount - 1]); }
+        if (aCount > 0) { DrawNode(graph.aNodes[aCount - 1]); }
         if (iCount > 0) { DrawNode(graph.iNodes[iCount - 1]); }
     }
 
+    //Tagged the prefab buttons with "GraphButton" tag. This finds them and deltes them so new ones can be added
     private void ClearNodes()
     {
         GameObject[] nodes = GameObject.FindGameObjectsWithTag("GraphButton");
@@ -291,26 +241,11 @@ public class GraphCTRL : MonoBehaviour
         }
     }
 
+    //Instantiates buttons with appropriate properties (a parent, a name, an action to perform on click. Puts them in the correct location
     private void DrawNode(Node node)
     {
 
         GameObject but;
-/*        if (graph.pNodes.Contains(node))
-        {
-            but = Instantiate(pButton, panel.transform, false);
-            if (node == graph.pNodes[pCount])
-            {
-                but.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = "P" + (pCount + 1);
-                but.gameObject.GetComponent<Button>().onClick.AddListener(() => HighlightObj(node));
-                Debug.Log("Drawing p node: " + pCount + " at position: " + node.Position);
-            }
-            else
-            {
-                but.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = "P" + (pCount + 2);
-                Debug.Log("Drawing p node: " + (pCount + 1) + " at position: " + node.Position);
-            }
-
-        }*/
         if (graph.aNodes.Contains(node))
         {
             if (node == graph.aNodes[aCount])
@@ -318,21 +253,21 @@ public class GraphCTRL : MonoBehaviour
                 but = Instantiate(aButton, panel.transform, false);
                 but.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = "A" + (aCount);
                 but.gameObject.GetComponent<Button>().onClick.AddListener(() => InstantiateVid(node));
-                Debug.Log("Drawing a node: " + aCount + " at position: " + node.Position);
+                //Debug.Log("Drawing a node: " + aCount + " at position: " + node.Position);
             }
             else if (graph.aNodes.Count > aCount + 1 && node == graph.aNodes[aCount + 1])
             {
                 but = Instantiate(aButton2, rightButtons.transform, false);
                 but.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = "A" + (aCount + 1);
                 but.gameObject.GetComponent<Button>().onClick.AddListener(() => InstantiateVid(node));
-                Debug.Log("Drawing a node: " + (aCount + 1) + " at position: " + node.Position);
+                //Debug.Log("Drawing a node: " + (aCount + 1) + " at position: " + node.Position);
             }
             else
             {
                 but = Instantiate(aButton2, leftButtons.transform, false);
                 but.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = "A" + (aCount - 1);
                 but.gameObject.GetComponent<Button>().onClick.AddListener(() => InstantiateVid(node));
-                Debug.Log("Drawing a node: " + (aCount - 1) + " at position: " + node.Position);
+                //Debug.Log("Drawing a node: " + (aCount - 1) + " at position: " + node.Position);
             }
         }
         else if (graph.iNodes.Contains(node))
@@ -364,10 +299,10 @@ public class GraphCTRL : MonoBehaviour
         }
         but.GetComponent<Transform>().localPosition = panel.transform.position + node.Position;
         but.GetComponent<MeshRenderer>().material.SetColor("_Color", node.NodeColor);
-        drawCount++;
         //Debug.Log("Drawing");
     }
 
+    //Assigns the appropriate clip to the node/button passed in. Defines where the clip should be shown. Just does this for a few of the Action nodes as a test 
     private void InstantiateVid(Node node)
     {
         if (GameObject.Find("ScrubScreenBig(Clone)"))
